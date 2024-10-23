@@ -41,6 +41,7 @@ func HandleLabdaEvent(ctx context.Context) error {
 	// Get SES configuration from lambda env variables
 	var (
 		fromAddress = os.Getenv("EMAIL_FROM_ADDRESS")
+		dryRun      = os.Getenv("DRY_RUN")
 	)
 
 	defaultedUsers, err := getDefaultedUsers(iamClient)
@@ -52,10 +53,12 @@ func HandleLabdaEvent(ctx context.Context) error {
 	for _, user := range defaultedUsers {
 		// email defaultedUsers
 		sendEmail(user.Email, fromAddress, sesClient, user.OlderThan)
-		// if isOld, _ := isKeyOld(user.Key, 100); isOld {
-		// 	// delete the key
-		// 	// deleteKeys(*user.Key.AccessKeyId, user.UserName, iamClient)
-		// }
+		if isOld, _ := isKeyOld(user.Key, 100); isOld {
+			// delete the key
+			if dryRun == "--dry-run" {
+				deleteKeys(*user.Key.AccessKeyId, user.UserName, iamClient)
+			}
+		}
 	}
 
 	return nil
