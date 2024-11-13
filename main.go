@@ -55,7 +55,7 @@ func HandleLabdaEvent(ctx context.Context) error {
 		sendEmail(user.Email, fromAddress, sesClient, user.OlderThan)
 		if isOld, _ := isKeyOld(user.Key, 100); isOld {
 			// delete the key
-			if dryRun != "--dry-run" {
+			if dryRun == "false" {
 				deleteKeys(*user.Key.AccessKeyId, user.UserName, iamClient)
 			}
 		}
